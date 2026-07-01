@@ -41,6 +41,16 @@ if (import.meta.env.DEV) {
     seek: (t: number) => { debugTime = t; },
     live: () => { debugTime = null; },
     time: () => clock.time,
+    bench: (frames = 60) => {
+      const t0 = performance.now();
+      for (let i = 0; i < frames; i++) {
+        if (session) highway.update(debugTime ?? clock.time, session.notes);
+        keyboard.update(1 / 60);
+        effects.update(1 / 60);
+        stage.render(1 / 60);
+      }
+      return (performance.now() - t0) / frames;
+    },
   };
 }
 

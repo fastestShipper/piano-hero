@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { MIDI_MIN, MIDI_MAX, isBlackKey, labelForMidi } from '../core/mapping';
 import type { TrackedNote } from '../game/judge';
 
@@ -18,7 +19,7 @@ interface NotePool {
 }
 
 function createNotePool(group: THREE.Group, color: number, emissiveIntensity: number): NotePool {
-  const geometry = new THREE.BoxGeometry(1, 0.32, 1);
+  const geometry = new RoundedBoxGeometry(1, 0.32, 1, 3, 0.09);
   const material = new THREE.MeshStandardMaterial({
     color, metalness: 0.3, roughness: 0.25,
     emissive: color, emissiveIntensity,
