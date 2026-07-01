@@ -25,10 +25,10 @@ function makeHorizonTexture(): THREE.CanvasTexture {
   canvas.width = 256;
   canvas.height = 256;
   const ctx = canvas.getContext('2d')!;
-  const gradient = ctx.createRadialGradient(128, 190, 10, 128, 190, 180);
-  gradient.addColorStop(0, 'rgba(255, 190, 110, 0.55)');
-  gradient.addColorStop(0.35, 'rgba(120, 110, 160, 0.22)');
-  gradient.addColorStop(0.7, 'rgba(40, 60, 110, 0.10)');
+  const gradient = ctx.createRadialGradient(128, 190, 6, 128, 190, 120);
+  gradient.addColorStop(0, 'rgba(255, 190, 110, 0.5)');
+  gradient.addColorStop(0.35, 'rgba(140, 115, 150, 0.18)');
+  gradient.addColorStop(0.7, 'rgba(40, 60, 110, 0.06)');
   gradient.addColorStop(1, 'rgba(5, 7, 13, 0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 256, 256);
@@ -90,7 +90,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   // Warm horizon glow at the far end of the highway
   const horizon = new THREE.Mesh(
-    new THREE.PlaneGeometry(90, 40),
+    new THREE.PlaneGeometry(130, 60),
     new THREE.MeshBasicMaterial({
       map: makeHorizonTexture(), transparent: true,
       blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
