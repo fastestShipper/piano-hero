@@ -11,7 +11,7 @@ A Guitar Hero-style web experience focused on piano practice. Notes approach the
 
 | Decision | Choice |
 |----------|--------|
-| Keyboard mapping | FL Studio convention, 2 full octaves (C3 to C5) |
+| Keyboard mapping | Two-row piano layout centered on middle C (revised 2026-07-01 per user feedback: E = C4 so chords around middle C are comfortable; A3-B3 overlap zone on both rows) |
 | Audio | Sampled piano (Salamander Grand, public domain) via Tone.js Sampler |
 | MVP content | 3 to 4 built-in JSON charts; MIDI import deferred to future work |
 | Visual direction | Concert hall dark-luxury: black lacquer piano, warm ivory keys, amber/cyan emissive note gems, golden particle bursts, deep blue-black fog, selective bloom, stage lighting that scales with combo |
@@ -68,17 +68,19 @@ Constraints: `game/judge.ts` and `game/scoring.ts` are pure and import neither T
 
 ## 2. Keyboard-to-piano mapping
 
-FL Studio convention using `KeyboardEvent.code` (layout independent):
+Two-row piano layout centered on middle C, using `KeyboardEvent.code` (layout independent). Revised per user feedback: middle C must sit near the center so chords around C4 are comfortable.
 
 ```
-Upper octave (right hand):
-   2  3     5  6  7          -> C#4 D#4   F#4 G#4 A#4
-  Q  W  E  R  T  Y  U  I     -> C4 D4 E4 F4 G4 A4 B4 C5
+Top row (right hand, C4 centered at E):
+      2     4  5     7  8  9        -> A#3   C#4 D#4   F#4 G#4 A#4
+   Q  W  E  R  T  Y  U  I  O  P     -> A3 B3 C4 D4 E4 F4 G4 A4 B4 C5
 
-Lower octave (left hand):
-   S  D     G  H  J          -> C#3 D#3   F#3 G#3 A#3
-  Z  X  C  V  B  N  M  ,     -> C3 D3 E3 F3 G3 A3 B3 C4
+Bottom row (left hand, C3 octave + extension):
+    S  D     G  H  J     L  ;       -> C#3 D#3  F#3 G#3 A#3  C#4 D#4
+   Z  X  C  V  B  N  M  ,  .  /     -> C3 D3 E3 F3 G3 A3 B3 C4 D4 E4
 ```
+
+A3-B3 exist on both rows (overlap zone) so either hand can take them; C4-E4 also exist at the end of the bottom row for left-hand chords into the middle-C zone.
 
 Musical-feel requirements:
 - Full polyphony: N simultaneous keys, chords of 6+ notes.

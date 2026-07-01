@@ -15,8 +15,24 @@ export interface Stage {
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   setComboTier(tier: number): void;
+  pulse(): void;
   render(dt: number): void;
   resize(): void;
+}
+
+function makeHorizonTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+  const gradient = ctx.createRadialGradient(128, 190, 10, 128, 190, 180);
+  gradient.addColorStop(0, 'rgba(255, 190, 110, 0.55)');
+  gradient.addColorStop(0.35, 'rgba(120, 110, 160, 0.22)');
+  gradient.addColorStop(0.7, 'rgba(40, 60, 110, 0.10)');
+  gradient.addColorStop(1, 'rgba(5, 7, 13, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(canvas);
 }
 
 export function createStage(canvas: HTMLCanvasElement): Stage {
@@ -72,6 +88,17 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     cones.push(cone);
   }
 
+  // Warm horizon glow at the far end of the highway
+  const horizon = new THREE.Mesh(
+    new THREE.PlaneGeometry(90, 40),
+    new THREE.MeshBasicMaterial({
+      map: makeHorizonTexture(), transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+    }),
+  );
+  horizon.position.set(0, 10, -69.5);
+  scene.add(horizon);
+
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(
@@ -82,6 +109,8 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
 
   let targetTier = 0;
   let currentTier = 0;
+  let pulseEnergy = 0;
+  const BASE_FOV = 55;
 
   return {
     scene,
@@ -90,11 +119,22 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     setComboTier(tier: number): void {
       targetTier = Math.max(0, Math.min(3, tier));
     },
+    pulse(): void {
+      pulseEnergy = 1;
+    },
     render(dt: number): void {
       currentTier += (targetTier - currentTier) * Math.min(1, dt * 4);
       const level = currentTier / 3;
       bloom.strength = BLOOM_BASE + (BLOOM_MAX - BLOOM_BASE) * level;
       for (const cone of cones) cone.material.opacity = CONE_MAX_OPACITY * level;
+      if (pulseEnergy > 0.001) {
+        camera.fov = BASE_FOV - pulseEnergy * 1.6;
+        camera.updateProjectionMatrix();
+        pulseEnergy *= Math.max(0, 1 - dt * 6);
+      } else if (camera.fov !== BASE_FOV) {
+        camera.fov = BASE_FOV;
+        camera.updateProjectionMatrix();
+      }
       composer.render();
     },
     resize(): void {

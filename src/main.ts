@@ -2,55 +2,101 @@ import * as Tone from 'tone';
 import { PianoSampler } from './audio/piano';
 import { KeyboardInput, eventTimeToAudioTime } from './core/input';
 import { SongClock } from './core/clock';
-import { Judge } from './game/judge';
+import { GameSession } from './game/session';
+import { accuracy, multiplierFor } from './game/scoring';
 import { song } from './charts/builder';
 import { createStage } from './render/scene';
 import { createKeyboard } from './render/keyboard3d';
 import { createHighway } from './render/highway';
+import { createEffects } from './render/effects';
+import { createHud } from './ui/hud';
 
 const canvas = document.getElementById('stage') as HTMLCanvasElement;
 const stage = createStage(canvas);
 const keyboard = createKeyboard(stage.scene);
 const highway = createHighway(stage.scene, keyboard.laneX, keyboard.laneWidth);
+const effects = createEffects(stage.scene);
+const hud = createHud();
+hud.setVisible(false);
 window.addEventListener('resize', () => stage.resize());
 
-// Dev harness: F1 plays a test chart through the judge (full loop lands in Task 10)
+const clock = new SongClock(() => Tone.now());
+let session: GameSession | null = null;
+let piano: PianoSampler | null = null;
+
+// Dev harness: F1 plays a test chart end to end (menu replaces this in Task 11)
 const testChart = song('Test scale', 90, 1, [
   [0, 60, 0.5, 'R'], [1, 62, 0.5, 'R'], [2, 64, 0.5, 'R'], [3, 65, 0.5, 'R'],
   [4, 67, 2, 'R'], [4, 48, 2, 'L'], [6, 64, 0.5, 'R'], [7, 60, 0.5, 'R'],
   [8, 55, 1, 'L'], [8, 64, 1, 'R'], [9.5, 61, 0.5, 'R'], [10.5, 66, 1, 'R'],
 ]);
-const clock = new SongClock(() => Tone.now());
-let judge: Judge | null = null;
 
 window.addEventListener('keydown', (e) => {
   if (e.code === 'F1') {
     e.preventDefault();
-    judge = new Judge(testChart.notes);
+    session = new GameSession(testChart);
+    hud.setVisible(true);
     clock.start();
   }
 });
 
-// Dev-only inspection hook, removed in Task 10
+// Dev-only inspection hook, removed in Task 11
 let debugTime: number | null = null;
 (window as unknown as Record<string, unknown>).__ph = {
   time: () => clock.time,
   audioNow: () => Tone.now(),
-  judgeNotes: () => (judge ? judge.notes.map((n) => `${n.midi}@${n.t.toFixed(2)}:${n.state}`) : null),
   seek: (t: number) => { debugTime = t; },
   live: () => { debugTime = null; },
 };
+
+function songTimeNow(): number {
+  return debugTime ?? clock.time;
+}
+
+// Audio timestamps arrive on the audio clock; song time = audio time - song start
+function toSongTime(rawAudioTime: number): number {
+  if (debugTime !== null) return debugTime; // dev seek: judge at the frozen time
+  return rawAudioTime - (Tone.now() - clock.time);
+}
+
+function onNoteOn(midi: number, timeStamp: number): void {
+  piano?.noteOn(midi);
+  keyboard.press(midi);
+  if (!session || !clock.running) return;
+  const t = toSongTime(eventTimeToAudioTime(timeStamp));
+  const result = session.handleNoteOn(midi, t);
+  const state = session.score;
+  if (result.hit) {
+    const note = session.notes[result.hit.noteId];
+    effects.burst(keyboard.laneX(note.midi), result.hit.judgment, note.hand);
+    if (result.hit.judgment === 'perfect') effects.shockwave(keyboard.laneX(note.midi));
+    if (state.combo > 0 && state.combo % 10 === 0) stage.pulse();
+    hud.flashJudgment(result.hit.judgment);
+  }
+}
+
+function onNoteOff(midi: number, timeStamp: number): void {
+  piano?.noteOff(midi);
+  keyboard.release(midi);
+  if (!session || !clock.running) return;
+  session.handleNoteOff(midi, toSongTime(eventTimeToAudioTime(timeStamp)));
+}
 
 let lastFrame = performance.now();
 function frame(now: number): void {
   const dt = Math.min(0.1, (now - lastFrame) / 1000);
   lastFrame = now;
-  if (judge) {
-    const t = debugTime ?? clock.time;
-    judge.advance(t);
-    highway.update(t, judge.notes);
+  if (session) {
+    const t = songTimeNow();
+    const misses = session.sweep(t);
+    if (misses.length > 0) hud.flashJudgment('miss');
+    highway.update(t, session.notes);
+    const state = session.score;
+    stage.setComboTier(multiplierFor(state.combo) - 1);
+    hud.update(state.score, state.combo, multiplierFor(state.combo), accuracy(state));
   }
   keyboard.update(dt);
+  effects.update(dt);
   stage.render(dt);
   requestAnimationFrame(frame);
 }
@@ -58,26 +104,18 @@ requestAnimationFrame(frame);
 
 const screens = document.getElementById('screens')!;
 const overlay = document.createElement('div');
-overlay.style.cssText =
-  'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
-  'background:rgba(5,7,13,0.7);color:#e8e4da;font-size:1.4rem;cursor:pointer;';
+overlay.className = 'screen-overlay';
 overlay.textContent = 'Haz clic para iniciar el piano';
 screens.appendChild(overlay);
 
 overlay.addEventListener('click', async () => {
   overlay.textContent = 'Cargando piano...';
   try {
-    const piano = await PianoSampler.create();
+    piano = await PianoSampler.create();
     overlay.remove();
     const input = new KeyboardInput((e) => {
-      if (e.type === 'on') {
-        piano.noteOn(e.midi);
-        keyboard.press(e.midi);
-        judge?.onKeyDown(e.midi, eventTimeToAudioTime(e.timeStamp) - (clockStartAudioTime() ?? 0));
-      } else {
-        piano.noteOff(e.midi);
-        keyboard.release(e.midi);
-      }
+      if (e.type === 'on') onNoteOn(e.midi, e.timeStamp);
+      else onNoteOff(e.midi, e.timeStamp);
     });
     input.attach();
   } catch (err) {
@@ -85,9 +123,3 @@ overlay.addEventListener('click', async () => {
     console.error(err);
   }
 });
-
-// Song time for a raw audio timestamp: audio clock minus the song start
-function clockStartAudioTime(): number | null {
-  if (!clock.running) return null;
-  return Tone.now() - clock.time;
-}
