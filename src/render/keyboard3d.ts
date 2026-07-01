@@ -90,12 +90,12 @@ export function createKeyboard(scene: THREE.Scene): Keyboard3D {
     group.add(label);
   }
 
-  // Piano body: black lacquer block behind the keys plus a red felt strip
+  // Piano body: low lacquer sill behind the keys so incoming notes stay visible
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(17.5, 1.6, 1.2),
+    new THREE.BoxGeometry(17.5, 0.9, 1.2),
     new THREE.MeshStandardMaterial({ color: 0x0b0c12, metalness: 0.8, roughness: 0.15 }),
   );
-  body.position.set(0, 0.6, -0.7);
+  body.position.set(0, 0.45, -0.7);
   group.add(body);
   const felt = new THREE.Mesh(
     new THREE.BoxGeometry(16.2, 0.06, 0.12),
