@@ -154,7 +154,170 @@ body::after {
   100% { opacity: 0; transform: translateX(-50%) scale(1); }
 }
 
-/* ---------- Screens (menu / loading / results land in Task 11) ---------- */
+/* ---------- Screens ---------- */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: radial-gradient(ellipse 80% 70% at 50% 35%, rgba(10, 14, 26, 0.82), rgba(3, 4, 9, 0.94));
+  color: var(--color-text);
+  z-index: 10;
+}
+
+.menu-title {
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  margin-left: 0.34em; /* optical centering against tracking */
+  background: linear-gradient(180deg, #fff4dd 20%, #ffb347 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 60px rgba(255, 179, 71, 0.28);
+}
+
+.menu-subtitle {
+  color: var(--color-dim);
+  letter-spacing: 0.12em;
+  margin-bottom: 14px;
+}
+
+.song-list {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.song-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 220px;
+  padding: 22px 20px;
+  border: 1px solid rgba(255, 179, 71, 0.18);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 179, 71, 0.07), rgba(15, 20, 36, 0.6));
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.song-card:hover, .song-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: rgba(255, 179, 71, 0.55);
+  box-shadow: 0 12px 40px rgba(255, 179, 71, 0.12);
+  outline: none;
+}
+
+.song-name { font-size: 1.12rem; font-weight: 600; }
+
+.song-meta { color: var(--color-dim); font-size: 0.82rem; letter-spacing: 0.08em; }
+
+.menu-actions { display: flex; gap: 14px; margin-top: 8px; }
+
+.menu-button {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #ffcf87, #ff9c2e);
+  color: #241503;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.menu-button:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 179, 71, 0.35); }
+
+.menu-button.ghost {
+  background: transparent;
+  border: 1px solid rgba(232, 228, 218, 0.3);
+  color: var(--color-text);
+}
+
+.menu-help {
+  margin-top: 20px;
+  max-width: 520px;
+  text-align: center;
+  color: var(--color-dim);
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.screen-loading p { font-size: 1.2rem; letter-spacing: 0.08em; }
+
+.countdown {
+  position: fixed;
+  left: 50%;
+  top: 34%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  font-weight: 700;
+  color: var(--color-ivory);
+  text-shadow: 0 0 60px rgba(255, 179, 71, 0.5);
+  z-index: 9;
+  pointer-events: none;
+}
+
+.countdown.tick { animation: countdown-tick 500ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes countdown-tick {
+  0% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.5); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.screen-pause {
+  background: rgba(3, 4, 9, 0.78);
+}
+
+.screen-pause p { font-size: 2.4rem; font-weight: 600; letter-spacing: 0.3em; }
+
+.screen-pause span { color: var(--color-dim); letter-spacing: 0.12em; }
+
+.results-grade {
+  font-size: 7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.grade-s { color: #ffd27a; text-shadow: 0 0 80px rgba(255, 210, 122, 0.8); }
+.grade-a { color: #ffb347; text-shadow: 0 0 50px rgba(255, 179, 71, 0.55); }
+.grade-b { color: #4dd7ff; text-shadow: 0 0 40px rgba(77, 215, 255, 0.45); }
+.grade-c { color: #9aa4c0; }
+
+.results-song { color: var(--color-dim); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.9rem; }
+
+.results-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, 80vw);
+  padding: 22px 26px;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 228, 218, 0.12);
+  background: rgba(12, 16, 30, 0.55);
+}
+
+.results-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.results-row span { color: var(--color-dim); }
+
+.results-row b { font-variant-numeric: tabular-nums; }
 
 .screen-overlay {
   position: fixed;

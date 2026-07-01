@@ -122,8 +122,11 @@ export function createHighway(
 
   function place(pool: NotePool, note: TrackedNote, songTime: number, withLabel: boolean): void {
     if (pool.count >= POOL_SIZE) return;
-    const headZ = -(note.t - songTime) * NOTE_SPEED;
-    const length = Math.max(0.8, note.d * NOTE_SPEED);
+    let headZ = -(note.t - songTime) * NOTE_SPEED;
+    const tailZ = -(note.t + note.d - songTime) * NOTE_SPEED;
+    // A hold being played is consumed at the strike line instead of sliding on
+    if (note.holding) headZ = Math.min(headZ, 0);
+    const length = Math.max(0.8, headZ - tailZ);
     const black = isBlackKey(note.midi);
     const y = black ? 1.2 : 1.0;
     position.set(laneX(note.midi), y, headZ - length / 2);
@@ -150,8 +153,13 @@ export function createHighway(
         if (note.t + note.d < songTime - TRAIL_SECONDS) continue;
         if (note.t > songTime + LOOKAHEAD_SECONDS) break;
         if (note.state === 'hit' && !note.holding) continue;
-        if (note.state === 'missed') place(missedPool, note, songTime, false);
-        else place(note.hand === 'R' ? rightPool : leftPool, note, songTime, true);
+        if (note.state === 'missed') {
+          // Missed notes vanish shortly after crossing the line
+          if (songTime - note.t > TRAIL_SECONDS) continue;
+          place(missedPool, note, songTime, false);
+        } else {
+          place(note.hand === 'R' ? rightPool : leftPool, note, songTime, true);
+        }
       }
       for (const pool of [rightPool, leftPool, missedPool]) {
         for (let i = pool.count; i < POOL_SIZE; i++) pool.mesh.setMatrixAt(i, parked);
