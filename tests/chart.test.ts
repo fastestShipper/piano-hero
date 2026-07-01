@@ -7,7 +7,7 @@ describe('parseChart', () => {
     title: 'Test', bpm: 100, difficulty: 1, audioOffset: 0,
     notes: [
       { t: 1, midi: 60, d: 0.5, hand: 'R' },
-      { t: 0, midi: 48, d: 0.25, hand: 'L' },
+      { t: 0, midi: 55, d: 0.25, hand: 'L' },
     ],
   };
 
@@ -18,8 +18,10 @@ describe('parseChart', () => {
   });
 
   it('rejects out-of-range midi', () => {
-    const bad = { ...valid, notes: [{ t: 0, midi: 90, d: 1, hand: 'R' }] };
-    expect(() => parseChart(bad)).toThrow(ChartError);
+    const high = { ...valid, notes: [{ t: 0, midi: 90, d: 1, hand: 'R' }] };
+    expect(() => parseChart(high)).toThrow(ChartError);
+    const low = { ...valid, notes: [{ t: 0, midi: 48, d: 1, hand: 'R' }] };
+    expect(() => parseChart(low)).toThrow(ChartError);
   });
 
   it('rejects non-positive duration and negative time', () => {

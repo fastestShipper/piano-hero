@@ -87,7 +87,7 @@ export function createScreens(): Screens {
 
       const help = document.createElement('p');
       help.className = 'menu-help';
-      help.textContent = 'Fila inferior: octava grave. Fila superior: do central en E. Las notas te muestran la tecla.';
+      help.textContent = 'El do central es la tecla B. La fila inferior corre de F3 a A4 y las notas te muestran la tecla.';
       menu.appendChild(help);
     },
 

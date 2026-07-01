@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { MIDI_MIN, MIDI_MAX, isBlackKey, labelForMidi } from '../core/mapping';
+import { KEYBOARD_WIDTH } from './keyboard3d';
 import type { TrackedNote } from '../game/judge';
 
 export const NOTE_SPEED = 18; // world units per second toward the player
@@ -40,7 +41,7 @@ export function createHighway(
 
   // Highway bed
   const bed = new THREE.Mesh(
-    new THREE.PlaneGeometry(17.5, 70),
+    new THREE.PlaneGeometry(KEYBOARD_WIDTH, 70),
     new THREE.MeshStandardMaterial({ color: 0x090b12, metalness: 0.6, roughness: 0.7 }),
   );
   bed.rotation.x = -Math.PI / 2;
@@ -65,7 +66,7 @@ export function createHighway(
 
   // Strike bar: where notes must be hit
   const strikeBar = new THREE.Mesh(
-    new THREE.BoxGeometry(17.5, 0.06, 0.18),
+    new THREE.BoxGeometry(KEYBOARD_WIDTH, 0.06, 0.18),
     new THREE.MeshStandardMaterial({
       color: 0xfff2dd, emissive: 0xffd9a0, emissiveIntensity: 1.6,
       metalness: 0.2, roughness: 0.4,

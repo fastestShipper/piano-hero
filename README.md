@@ -13,19 +13,20 @@ pnpm build      # type-check + production build
 
 ## Controls
 
-Two-row piano layout centered on middle C. `KeyboardEvent.code` based, so it works on any physical layout.
+Piano layout with **middle C on B**. `KeyboardEvent.code` based, so it works on any physical layout.
 
 ```
-Top row (right hand, middle C at E):
+Bottom row (main, one continuous run F3..A4, middle C at B):
+    S  D  F     H  J     L  ;       -> F#3 G#3 A#3  C#4 D#4  F#4 G#4
+   Z  X  C  V  B  N  M  ,  .  /     -> F3 G3 A3 B3 C4 D4 E4 F4 G4 A4
+
+Top row (alternate C4 octave plus the highest notes):
       2     4  5     7  8  9        -> A#3   C#4 D#4   F#4 G#4 A#4
    Q  W  E  R  T  Y  U  I  O  P     -> A3 B3 C4 D4 E4 F4 G4 A4 B4 C5
-
-Bottom row (left hand):
-    S  D     G  H  J     L  ;       -> C#3 D#3  F#3 G#3 A#3  C#4 D#4
-   Z  X  C  V  B  N  M  ,  .  /     -> C3 D3 E3 F3 G3 A3 B3 C4 D4 E4
 ```
 
-- A3-B3 exist on both rows so either hand can take them.
+- The home-row keys sit exactly where the black keys fall; G and K are unused because the piano has no black key there (B-C and E-F).
+- A3-A4 exist on both rows so either hand can take them; A#4, B4 and C5 live only on the top row.
 - Falling notes display the physical key letter on the gem itself.
 - The piano always sounds, even on a missed judgment: expression first.
 - `Esc` pauses a song or exits free play. `Espacio` taps during calibration.
@@ -50,7 +51,7 @@ Charts are built in beats via `song(title, bpm, difficulty, rows)` where each ro
 }
 ```
 
-`t` and `d` are seconds; `midi` must be 48-72 (C3-C5).
+`t` and `d` are seconds; `midi` must be 53-72 (F3-C5).
 
 ## Architecture
 

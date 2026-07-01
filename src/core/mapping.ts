@@ -1,16 +1,16 @@
-export const MIDI_MIN = 48;
-export const MIDI_MAX = 72;
+export const MIDI_MIN = 53; // F3
+export const MIDI_MAX = 72; // C5
 
-// Piano-style layout centered on middle C (user feedback: chords around C4
-// must be comfortable). Bottom row = C3 octave, top row = C4 octave starting
-// at E, with an A3-B3 overlap zone reachable by either hand. The digit keys
-// 4 5 7 8 9 sit physically between the letters exactly like black keys.
+// Piano-style layout with middle C on B (user request): the bottom row is one
+// continuous run F3..A4 centered on B = C4, and the home-row keys sit exactly
+// where the black keys fall (G and K stay unused where the piano has gaps).
+// The top row remains an alternate C4 octave (E = C4) reaching C5 at P.
 export const KEY_TO_MIDI: Readonly<Record<string, number>> = {
-  // Bottom row: C3..B3 plus extension into the middle-C zone
-  KeyZ: 48, KeyS: 49, KeyX: 50, KeyD: 51, KeyC: 52, KeyV: 53, KeyG: 54,
-  KeyB: 55, KeyH: 56, KeyN: 57, KeyJ: 58, KeyM: 59,
-  Comma: 60, KeyL: 61, Period: 62, Semicolon: 63, Slash: 64,
-  // Top row: overlap A3..B3, then C4..C5 centered on the keyboard
+  // Bottom row: F3..A4, middle C on B
+  KeyZ: 53, KeyS: 54, KeyX: 55, KeyD: 56, KeyC: 57, KeyF: 58, KeyV: 59,
+  KeyB: 60, KeyH: 61, KeyN: 62, KeyJ: 63, KeyM: 64,
+  Comma: 65, KeyL: 66, Period: 67, Semicolon: 68, Slash: 69,
+  // Top row: overlap A3..A4 plus the exclusive top notes A#4, B4, C5
   KeyQ: 57, Digit2: 58, KeyW: 59,
   KeyE: 60, Digit4: 61, KeyR: 62, Digit5: 63, KeyT: 64, KeyY: 65,
   Digit7: 66, KeyU: 67, Digit8: 68, KeyI: 69, Digit9: 70, KeyO: 71, KeyP: 72,
@@ -27,13 +27,13 @@ export function midiToName(midi: number): string {
   return `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
 }
 
-// On-screen labels: bottom row identifies the low octave, top row identifies
-// middle C and above, matching how each hand naturally sits
+// On-screen labels: the continuous bottom row identifies F3..A4 (one hand
+// position never mixes rows mid-phrase); the top row owns A#4, B4, C5
 const LABEL_BY_MIDI: Record<number, string> = {
-  48: 'Z', 49: 'S', 50: 'X', 51: 'D', 52: 'C', 53: 'V', 54: 'G',
-  55: 'B', 56: 'H', 57: 'N', 58: 'J', 59: 'M',
-  60: 'E', 61: '4', 62: 'R', 63: '5', 64: 'T', 65: 'Y',
-  66: '7', 67: 'U', 68: '8', 69: 'I', 70: '9', 71: 'O', 72: 'P',
+  53: 'Z', 54: 'S', 55: 'X', 56: 'D', 57: 'C', 58: 'F', 59: 'V',
+  60: 'B', 61: 'H', 62: 'N', 63: 'J', 64: 'M',
+  65: ',', 66: 'L', 67: '.', 68: ';', 69: '/',
+  70: '9', 71: 'O', 72: 'P',
 };
 
 export function labelForMidi(midi: number): string {

@@ -4,9 +4,15 @@ import { MIDI_MIN, MIDI_MAX, isBlackKey, labelForMidi } from '../core/mapping';
 export const WHITE_PITCH = 1.05;
 const WHITE_WIDTH = 0.95;
 const BLACK_WIDTH = 0.6;
-const WHITE_COUNT_HALF = 7; // 15 white keys centered on index 7 (C4)
 const PRESS_DIP = 0.12;
 const FLASH_DECAY = 4;
+
+let whiteCount = 0;
+for (let midi = MIDI_MIN; midi <= MIDI_MAX; midi++) {
+  if (!isBlackKey(midi)) whiteCount++;
+}
+const WHITE_CENTER = (whiteCount - 1) / 2;
+export const KEYBOARD_WIDTH = whiteCount * WHITE_PITCH + 1;
 
 interface KeyEntry {
   mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>;
@@ -69,7 +75,7 @@ export function createKeyboard(scene: THREE.Scene): Keyboard3D {
       );
       mesh.position.set(x, 0.62, 1.6);
     } else {
-      x = (whiteIndex - WHITE_COUNT_HALF) * WHITE_PITCH;
+      x = (whiteIndex - WHITE_CENTER) * WHITE_PITCH;
       lastWhiteX = x;
       whiteIndex++;
       mesh = new THREE.Mesh(
@@ -92,13 +98,13 @@ export function createKeyboard(scene: THREE.Scene): Keyboard3D {
 
   // Piano body: low lacquer sill behind the keys so incoming notes stay visible
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(17.5, 0.9, 1.2),
+    new THREE.BoxGeometry(KEYBOARD_WIDTH, 0.9, 1.2),
     new THREE.MeshStandardMaterial({ color: 0x0b0c12, metalness: 0.8, roughness: 0.15 }),
   );
   body.position.set(0, 0.45, -0.7);
   group.add(body);
   const felt = new THREE.Mesh(
-    new THREE.BoxGeometry(16.2, 0.06, 0.12),
+    new THREE.BoxGeometry(KEYBOARD_WIDTH - 1.3, 0.06, 0.12),
     new THREE.MeshStandardMaterial({ color: 0x8a1f2b, roughness: 0.9 }),
   );
   felt.position.set(0, 0.56, -0.05);
